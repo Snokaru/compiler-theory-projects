@@ -1,14 +1,14 @@
 import sys
 
 class NFA:
-    def __init__(self, states_matrix, initial_state, final_state):
+    def __init__(self, states_matrix, initial_states, final_states):
         self.states_matrix = states_matrix
-        self.initial_state = initial_state
-        self.final_state = final_state
+        self.initial_states = initial_states
+        self.final_states = final_states
         self.number_of_states = len(self.states_matrix)
 
     def check_word(self, word):
-        current_states = [self.initial_state]
+        current_states = self.initial_states
         print(f"WORD: {word}")
         for token in word:
             print(f"CURRENT TOKEN: {token}; CURRENT STATES: {current_states}")
@@ -24,7 +24,11 @@ class NFA:
                 return False
             current_states = next_states
         print(f"FINAL STATES: {current_states}")
-        return final_state in current_states
+        
+        for state in current_states:
+            if state in final_states:
+                return True
+        return False
                         
 if __name__ == '__main__':
     states_matrix = None
@@ -39,8 +43,8 @@ if __name__ == '__main__':
             first_state = int(input_line[0])
             second_state = int(input_line[1])
             states_matrix[first_state][second_state] = input_line[2:]
-        initial_state, final_state = map(int, f.readline().strip().split(" "))
+        initial_states = list(map(int, f.readline().strip().split(" ")))
+        final_states = list(map(int, f.readline().strip().split(" ")))
 
-    print(states_matrix)
-    automata = NFA(states_matrix, initial_state, final_state)
+    automata = NFA(states_matrix, initial_states, final_states)
     print(automata.check_word(word))
