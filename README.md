@@ -1,3 +1,3 @@
 # Projects For Compilation Theory Class
 
-1. Non Finite Automata Simulation
+1. Nondeterministic Finite Automata Simulation
