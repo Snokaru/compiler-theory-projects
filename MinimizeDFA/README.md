@@ -4,18 +4,28 @@
 
 
 
-This program takes an input file representing a DFA with the following format: 
+This program takes an input file representing a complete DFA with the following format: 
 ```
-3 4 # number of states and number of transitions
-0 1 b # following lines describe a transition as <first_state> <second_state> <transition_token> <transition_token> ...
-0 0 a b
-1 2 b
-2 2 a b
+8 15 # number of states and number of transitions
+0 1 0 # following lines describe a transition as <first_state> <second_state> <transition_token> <transition_token> ...
+0 2 1
+1 6 1
+1 2 0
+2 3 0
+2 5 1
+3 5 0
+3 4 1
+4 4 1
+4 5 0
+5 5 0 1
+6 1 0
+6 2 1
+7 0 0
+7 6 1
 0 # initial states
-2 # final states
+3 4 5 7 # final states
 ```
-and a word and outputs whether the read word is part of the language represented by the automata.
-
+and outputs the states matrix, initial states and final states of the minimized DFA
 Execution:
 ```
 python3 main.py <automata_file>
@@ -23,7 +33,7 @@ python3 main.py <automata_file>
 
 Example:
 ```
-python3 main.py input.txt abba
+python3 main.py input.txt
 ```
 
 
