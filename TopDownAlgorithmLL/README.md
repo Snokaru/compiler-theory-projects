@@ -2,8 +2,8 @@
 
 ## How It Works
 
-This program takes an input representing a arithmetic equation and prints a left-most derivation
-of the equation or an error message if the synthax is incorrect.
+This program takes an input representing an arithmetic equation and prints a left-most derivation
+of the equation or an error message if the syntax is incorrect.
 
 Execution:
 ```
