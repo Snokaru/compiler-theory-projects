@@ -13,10 +13,28 @@ class AST:
     def __init__(self, head):
         self.head = head
 
-    def print_preorder(self, node, indent=0):
+    def print_preorder(self):
+        self._print_preorder(self.head, 0)
+
+    def _print_preorder(self, node, indent=0):
         print(indent * " ", node)
         for child in node.children:
-            self.print_preorder(child, indent + 2)
+            self._print_preorder(child, indent + 2)
+
+    def get_number_of_children(self):
+        return len(children)
+
+    def copy_tree(self):
+        head_node = ASTNode(self.head.value, None, [])
+        ast = AST(head_node)
+        self._copy_tree(ast.head, self.head)
+        return ast
+
+    def _copy_tree(self, copying_node, copied_node):
+        copying_node.value = copied_node.value
+        for child in copied_node.children:
+            copying_node.children.append(ASTNode(parent=copying_node, children=[]))
+            self._copy_tree(copying_node.children[-1], child)
 
 class ASTNode:
     def __init__(self, value=None, parent=None, children=[]):
@@ -36,11 +54,6 @@ class ASTNode:
     def __str__(self):
         return f'ASTNode({self.value})'
 
-current_node = ASTNode()
-ast = AST(current_node)
-left_derivation_rules = []
-position = 0
-
 def first(s):
     return next(iter(s))
 
@@ -56,63 +69,57 @@ def read_language(filename):
             rules_dictionary[input_line[0]] = input_line[1:]
     return rules_dictionary
 
-def apply_rule(word, rule, rules, indent):
-    global position
-    global left_derivation_rules
-    global current_node
+def apply_rule(word, rule, rules, indent, position):
     if rule == '$':
         return
     #print(" " * indent, f'{rule}->{"|".join(rules[rule])}')
-    all_productions_bad = True
-
+    position_add = 0
+    good_productions = []
     for production in rules[rule]:
-        bad_production = False
-        position_add = 0
-        current_node.value = rule
+
         print(" " * indent, f'Trying production {rule}->{production}')
-        left_derivation_rules.append(f'{rule}->{production}')
+        possible_productions = [position]
+
         for letter in production:
             if isnonterminal(letter):
-                indent += 4
-                next_node = ASTNode(letter, current_node, [])
-                current_node.add_child(next_node)
-                current_node = current_node.children[-1]
-
-                bad_production = apply_rule(word, letter, rules, indent)
-
-                current_node = current_node.parent
-                indent -= 4
-                if bad_production:
+                new_possible_productions = []
+                for position in possible_productions:
+                    results = apply_rule(word, letter, rules, indent + 4, position)
+                    for next_production in results:
+                        new_possible_productions.append(next_production) 
+                possible_productions = new_possible_productions
+                if len(possible_productions) == 0:
                     break
-            elif position < len(word) and letter == word[position]:
-                next_node = ASTNode(letter, current_node, [])
-                current_node.add_child(next_node)
-                position_add += 1
-                position += 1
             else:
-                bad_production = True 
-                break
-        if bad_production:
-            left_derivation_rules.pop()
-            position -= position_add
-            print(" " * indent, f'Bad production')
-        else:
-            all_productions_bad = False
-            print(" " * indent, f'Good production')
-            break
+                new_possible_productions = []
+                for possible_production in possible_productions:
+                    if possible_production < len(word) and letter == word[possible_production]:
+                        new_possible_productions.append(possible_production + 1)
+                possible_productions = new_possible_productions
 
-    return all_productions_bad
+        if len(possible_productions) > 0:
+            print(" " * indent, 'Production Worked!')
+        else:
+            print(" " * indent, 'Production Failed!')
+        good_productions = good_productions + possible_productions
+     
+    return good_productions
     
 
 if __name__ == '__main__':
     input_file = sys.argv[1]
     word = sys.argv[2]
+    print(f"INPUT_PHRASE: {word}")
     language_rules = read_language(input_file)
-    #print(language_rules)
-    apply_rule(word, first(language_rules), language_rules, 0)
-    if position < len(word):
-        print("CUVANTUL INTRODUS ESTE INCORECT SINTACTIC")
+    ast_head = ASTNode(None, None, [])
+    ast = AST(ast_head)
+    possible_productions = apply_rule(word, first(language_rules), language_rules, 0, 0)
+    word_can_be_derived = False
+    for el in possible_productions:
+        if el == len(word):
+            word_can_be_derived = True
+            break
+    if word_can_be_derived:
+        print("THE WORD WAS DERIVED SUCCESFULLY")
     else:
-        print("CUVANTUL A PUTUT FI DERIVAT")
-        print(left_derivation_rules)
-        ast.print_preorder(ast.head)
+        print("THE WORD IS INCORRECT SINTACTICALLY")
