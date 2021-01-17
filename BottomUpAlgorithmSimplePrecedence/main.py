@@ -171,8 +171,53 @@ def print_table(alphabet, table):
             print(table[x][y], end=" ")
         print()
 
+def bottom_up(relation_table, alphabet, rules, word):
+    current_word = word 
+    used_rules = []
+    while len(word) > 1:
+        print(word)
+        less_than_pos = -1
+        greater_than_pos = -1 
+        for i in range(len(word) - 1):
+            if relation_table[word[i]][word[i+1]][0] == -1:
+                less_than_pos = i
+            if relation_table[word[i]][word[i+1]][0] == 1:
+                greater_than_pos = i
+                break
+
+        if greater_than_pos == -1:
+            greater_than_pos = len(word) - 1
+        
+
+        phrase = word[less_than_pos + 1:greater_than_pos + 1]
+        print(f"lt:{less_than_pos},gt:{greater_than_pos}")
+        found_rule = False
+        rule_symbol = None
+        for rule in rules:
+            for production in rules[rule]:
+                if production == phrase:
+                    found_rule = True
+                    used_rules.append(f'{rule}->{production}')
+                    rule_symbol = rule
+                    break
+            if found_rule:
+                break
+
+        if rule_symbol is None:
+            return None
+
+        print(f'{word[0:less_than_pos + 1]} + {rule_symbol} + {word[greater_than_pos+1:]}')
+        word = word[0:less_than_pos + 1] + rule_symbol + word[greater_than_pos+1:]
+    return used_rules
+
 if __name__ == '__main__':
     input_file = sys.argv[1]
+    word = sys.argv[2]
     alphabet, language_rules = read_language(input_file)
     relation_table = compute_precedence_relations(alphabet, language_rules)
-    print_table(alphabet, relation_table)
+    result = bottom_up(relation_table, alphabet, language_rules, word)
+    if result is None:
+        print("CUVANTUL ESTE INCORECT SINTACTIC")
+    else:
+        print("CUVANTUL ESTE CORECT SINTACTIC")
+        print(result[::-1])
